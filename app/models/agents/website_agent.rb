@@ -393,9 +393,14 @@ module Agents
         return
       end
       uri = Utils.normalize_uri(url)
-      log "Fetching #{uri}"
-      response = faraday.get(uri)
-
+      log "Fetching #{uri}@ #{Time.now.inspect}"
+      #response = faraday.get(uri)
+      response = faraday.get do |req|
+        req.url uri
+        req.options.timeout = 30           # open/read timeout in seconds
+        req.options.open_timeout = 10      # connection open timeout in seconds
+      end
+	  log "Fetched #{uri}@ #{Time.now.inspect}"
       raise "Failed: #{response.inspect}" unless consider_response_successful?(response)
 
       interpolation_context.stack {
